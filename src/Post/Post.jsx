@@ -1,5 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { deletePost, getPost } from "../API/PostAPI";
+import { createPost, deletePost, getPost, updatePost } from "../API/PostAPI";
 import Loading from "./Loading";
 import { NavLink } from "react-router-dom";
 import { useState } from "react";
@@ -22,13 +22,6 @@ const Post = () => {
     })
 
 
-
-    // const handleSeeMoreBTN = () => {
-    //     // console.log(post);
-    //     return  <IndvidualPost/>
-    // }
-
-
     const handleDeletePost = useMutation({
         mutationFn: (id) => deletePost(id),
         onSuccess: (data, id) => {
@@ -40,6 +33,31 @@ const Post = () => {
 
         }
     })
+
+
+    const handleUpdatePost = useMutation({
+        mutationFn: (id) => updatePost(id),
+        onSuccess: (ApiData, postID) => {
+            // console.log(ApiData, postID);  
+            queryClient.setQueryData(['posts', pageNumber], (postData) => {
+                return postData.map((currPost) => currPost.id === postID ? {...currPost, title:ApiData.data.title} : currPost)
+            })
+
+        }
+    })
+
+
+    const handleCreatePost = useMutation({
+        mutationFn: createPost,
+        onSuccess: (ApiData, postID) => {
+            // console.log(ApiData, postID);  
+            queryClient.setQueryData(['posts', pageNumber], (postData) => {
+                return [...postData, ApiData.data]
+            })
+
+        }
+    })
+
 
     if (isLoading) {
         return <Loading />
@@ -64,13 +82,13 @@ const Post = () => {
                                     <p className="font-serif">{currPost.body}</p>
 
                                     <div className="flex flex-row justify-center items-center">
-                                        <div className="flex flex-row gap-4 font-serif">
+                                        <div className="flex flex-row gap-2 font-serif">
 
                                             <NavLink to={`/post/${currPost.id}`}>
                                                 <button
                                                     className="p-1 mt-2 cursor-pointer bg-green-900 text-white  rounded-[2px]"
                                                 // onClick={handleSeeMoreBTN}
-                                                >See More</button>
+                                                >More</button>
                                             </NavLink>
                                             <button
                                                 className="p-1 mt-2 cursor-pointer bg-green-900 text-white rounded-[2px]"
@@ -78,8 +96,12 @@ const Post = () => {
                                             >Delete</button>
                                             <button
                                                 className="p-1 mt-2 cursor-pointer bg-green-900 text-white  rounded-[2px]"
-
+                                                onClick={() => handleUpdatePost.mutate(currPost.id)}
                                             >Update</button>
+                                            <button
+                                                className="p-1 mt-2 cursor-pointer bg-green-900 text-white  rounded-[2px]"
+                                                onClick={() => handleCreatePost.mutate()}
+                                            >Create</button>
                                         </div>
                                     </div>
                                 </li>

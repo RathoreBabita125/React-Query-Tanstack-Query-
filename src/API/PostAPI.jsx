@@ -17,3 +17,15 @@ export const getIndividualPost=async(id)=>{
 export const deletePost=(id)=>{
     return api.delete(`/posts/${id}`)
 }
+
+export const updatePost=(id)=>{
+    return api.patch(`/posts/${id}`, {title:"I have been updated."})
+}
+
+export const createPost=()=>{
+    return api.post(`/posts`, {
+        id:101,
+        title:"Good Morning!",
+        body:"Hi, This is Babita."
+    })
+}
